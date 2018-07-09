@@ -75,7 +75,7 @@ Na początku warto zobaczyć sobie dane wejściowe. Na wstępie mamy takie oto k
 | embarked           | Port źródłowy /załadunkowy (C - Cherbourk, Q - Quenstown, S - Southampton) |
 
 Pełny wygląd klas można zobaczyć na stronie:
-https://www.encyclopedia-titanica.org/class-gender-titanic-disaster-1912~chapter-2.html
+[https://www.encyclopedia-titanica.org/class-gender-titanic-disaster-1912~chapter-2.html](https://www.encyclopedia-titanica.org/class-gender-titanic-disaster-1912~chapter-2.html)
 
 Przeglądając pobieżnie można zobaczyć że nie wszystkie dane są wypełnione, więc trzeba je  w pewnym momencie wypełnić.
 
@@ -88,9 +88,13 @@ Zaczynając prace z Kaggle mamy tak naprawdę 3 możliwości:
 3. Możemy utworzyć Kernel i za pomocą edytora “Jupyter Notebooks”nie tylko wykonać wszystkie operacje ale także dodać w wygodnym edytorze MarkDown własne przypisy czy wykresy.
 
 Ja wybrałem Markdown bo można na bieżąco kontrolować co się dzieje.
-Jeśli chcesz utworzyć nowy kernel na stronie https://www.kaggle.com/c/titanic wybieramy Kernels -> New Kernel -> Notebook u góry po prawej możemy zmienić język z Python (który jest domyślny) na R.
+Jeśli chcesz utworzyć nowy kernel na stronie [https://www.kaggle.com/c/titanic](https://www.kaggle.com/c/titanic) wybieramy Kernels -> New Kernel -> Notebook u góry po prawej możemy zmienić język z Python (który jest domyślny) na R.
 
 ## Podstawowe operacje: Python
+
+Do podstawowych operacji pandas dobrze popatrzeć na cheatsheet:
+
+[http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf](http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf)
 
 ###  Biblioteki
 
@@ -106,9 +110,7 @@ print(check_output(["ls", "../input"]).decode("utf8"))
 - numpy - podstawowy biblioteka do algebry liniowej
 - pandas - biblioteka dzięki której można używać powszechne struktury data.frame bardzo pomocne przy obliczeniach
 
-Do podstawowych operacji pandas dobrze popatrzeć na cheatsheet:
 
-http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf
 
 ### pd.read_csv(name,header, index_col)
 
@@ -275,11 +277,13 @@ Name: Survived, dtype: int64
 
 Podstawowe funkcje można znaleść w:
 
-https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf
+[https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf](https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf)
 
-https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Tidyverse+Cheat+Sheet.pdf
+[https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Tidyverse+Cheat+Sheet.pdf](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Tidyverse+Cheat+Sheet.pdf)
 
-https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
+[https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+
+### Biblioteki
 
 Najpierw importujemy biblioteki
 
