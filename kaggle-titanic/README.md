@@ -294,7 +294,7 @@ list.files(path = "../input")
 
 * tidyverse - kolekcja paczek do data-science, zawiera w sobie już wiele potrzebnych paczek
 
-W R podobnie jak w python podstawowym obiektem na którym operujemy jest data.frame który jest 2 wymiarową tablicą z kolumnami i wierszami. W przypadku większych danych jest jeszcze struktura data.table ale dla 1309 tysiąca wierszy wystarczy zwykły data.frame. 
+W R podobnie jak w python podstawowym obiektem na którym operujemy jest data.frame (w książce Biecka “Przewodnik po pakiecie R” nazywane także  jako“ramki danych”) który jest 2 wymiarową tablicą z kolumnami i wierszami. W przypadku większych danych jest jeszcze struktura data.table ale dla 1309 tysiąca wierszy wystarczy zwykły data.frame. 
 
 ### read_csv()
 
