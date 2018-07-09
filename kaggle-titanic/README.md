@@ -101,6 +101,7 @@ Do podstawowych operacji pandas dobrze popatrzeć na cheatsheet:
 Pierwsze co pozostaje to zaimportowanie najważniejszych bibliotek które przydadzą się do operacji na danych.
 
 ```R
+import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 
 from subprocess import check_output
@@ -109,8 +110,6 @@ print(check_output(["ls", "../input"]).decode("utf8"))
 
 - numpy - podstawowy biblioteka do algebry liniowej
 - pandas - biblioteka dzięki której można używać powszechne struktury data.frame bardzo pomocne przy obliczeniach
-
-
 
 ### pd.read_csv(name,header, index_col)
 
