@@ -19,7 +19,7 @@ Planuje żeby w ciągu tygodnia robić 3 omówienia (w poniedziałek, środę i 
 1. (poniedziałek) Opis problemu, Importowanie danych i podstawowe informacje
 2. (środa) Wykresy i wyszukiwanie danych
 3. (piątek) Wypełnianie pustych danych i normalizacja Danych
-4. (poniedziałek) Klasyfikacja - algorytm i 
+4. (poniedziałek) Klasyfikacja - algorytm
 5. (środa) Poprawianie Modelu
 6. (piątek) Podsumowanie
 
@@ -96,6 +96,10 @@ Do podstawowych operacji pandas dobrze popatrzeć na cheatsheet:
 
 [http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf](http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf)
 
+Krótkie porównanie znalezione na facebook-u.
+
+![No automatic alt text available.](assets/33869776_1049764301843195_3825253901389529088_n.jpg) 
+
 ###  Biblioteki
 
 Pierwsze co pozostaje to zaimportowanie najważniejszych bibliotek które przydadzą się do operacji na danych.
@@ -124,7 +128,7 @@ train_df = pd.read_csv('../input/train.csv', header=0,index_col=0)
 test_df = pd.read_csv('../input/test.csv', header=0,index_col=0)
 ```
 
-#### pd.concat(a,b)
+### pd.concat(a,b)
 
 To polecenie na początku łączy nam oba obiekty po wierszach. Analizę danych powinniśmy robić na całym obszarze, bo może się zdarzyć że np: w train kolumna ma wszystkie pola wypełnione ale w tests już nie.
 
@@ -171,6 +175,18 @@ full.head()
 
 ![1531139493410](assets/1531139493410.png)
 
+### Wybieranie kolumn
+
+```R
+# import matplotlib.pyplot as plt
+    
+full[["Age","Pclass"]][5:30]
+```
+
+![1531308637239](assets/1531308637239.png)
+
+
+
 ### Filtrowanie
 
 Przykłady wybierania wierszy:
@@ -213,6 +229,14 @@ full[(full['Cabin'].str.contains('B2',na=False)) ] #filter data by columns
 ```
 
 ![1531140486070](assets/1531140486070.png)
+
+* filtrowanie po pustych wartościach
+
+```Python
+ full[full['Embarked'].isnull()]
+```
+
+![1531307994646](assets/1531307994646.png)
 
 ### df.isnull()
 
@@ -358,6 +382,8 @@ Zwraca rozmiar data.frame (wiersze i kolumny )
 
 ```R
 dim(full)
+nrow(full) #liczba kolumn
+ncol(full) #liczba wierszy
 ```
 
 ```R
@@ -412,6 +438,22 @@ Zwraca podstawowe informacje o kolumnach - jak liczba pustych wartości, wartoś
                     NAs   :1  
 ```
 
+### Wybieranie kolumn
+
+```R
+full[,c("Survived","Pclass")]
+```
+
+* Lub przez select z dplyr
+
+```r
+library(dplyr)
+
+select(full,Survived,Pclass)
+```
+
+![1531142375531](assets/1531142375531.png)
+
 ### Filtrowanie
 
 * Dane można zaznaczać przez indeksy
@@ -422,28 +464,14 @@ full[1:9,]
 
 ![1531142283314](assets/1531142283314.png)
 
-* Mozna też filtrować po kolumnach
-
-```R
-full[,c("Survived","Pclass")]
-```
-
-![1531142375531](assets/1531142375531.png)
-
-Lub przez select z dplyr
-
-```R
-select(full,Survived,Pclass)
-```
 
 
-
-* Do bardziej zaawansowango filtrowania po wartościach używa się biblioteki dplyr
+* Do bardziej zaawansowango filtrowania po wartościach używa się biblioteki dplyr. Można używać złączeń typu AND “&”OR “|” NOT “!”
 
 ```R
 library(dplyr)
 
-filter(full, Age > 5.0, Age < 7.0 )
+filter(full, Age > 5.0 & Age < 7.0 )
 ```
 
 ![1531142536699](assets/1531142536699.png)
@@ -452,9 +480,31 @@ filter(full, Age > 5.0, Age < 7.0 )
 
 ```R
 full %>% 
-	filter(Age > 5.0, Age < 7.0 ) %>%
+	filter(Age > 5.0 & Age < 7.0 ) %>%
 	select(Survived,Pclass)
 ```
+
+* sprawdzanie pustych wartości
+
+```R
+full %>% 
+	filter( is.na(Fare) )
+```
+
+![1531305635780](assets/1531305635780.png)
+
+* Filtrowanie po tekście używająć stringr
+
+https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html
+
+```R
+library(stringr)
+
+full %>%
+    filter( str_detect(Cabin, 'B2') )
+```
+
+![1531306666463](assets/1531306666463.png)
 
 ### Grupowanie
 
@@ -467,4 +517,378 @@ full %>%
 	summarise(Survived = sum(Survived))
 ```
 
+* Można też nie używać drop_na a opcji <Badge text="na.rm=T" type="error"/> 
+
+```R
+full %>%
+    group_by(Pclass,Sex) %>%
+	summarise(Survived = sum(Survived, na.rm = T))
+```
+
 ![1531143148049](assets/1531143148049.png)
+
+## Wykresy i wyszukiwanie danych
+
+Tak naprawdę pod tym pojęciem chciałem napisać w jaki sposób można dodać kolumny zawierające dodatkowe informacje które kryją się w surowych danych ponieważ może się zdarzyć że:
+
+* Jakieś informacje znajdują się w tekście a ponieważ znajdują się tam także inne informacje to algorytm nie wykryje że dana zmienna ma istotny wpływ
+* Niektóre dane są zbyt rozdrobnione (np: wiek) przez co zaburzają obraz całego modelu. Przecięz podczas próby uratowania się nikt nie pytał dokładnie o wiek, więc można podzielić je na mniejsze grupy typu małe dzieci, dorośli itp..
+* Część danych jest w postaci tekstowej, i trzeba je skategoryzować.
+
+##  Dane: Python
+
+### Kategoryzacja
+
+* Pierwszym problemem  w danych są dane tekstowe którze trzeba skategoryzować. W tym wypadku można użyć pandas.Categorical()
+
+```Python
+full['_Sex'] = pd.Categorical(full.Sex).codes
+full['_Embarked'] = pd.Categorical(full.Embarked).codes
+```
+
+W nowych kolumnach pojawią wartości 0  1
+
+### Kategoryzacja kolumny Cabin
+
+* Także tą kolumnę można skategoryzować. Można zauważyć że pierwsza litera może mieć jakieś znaczenie. Nie wszystkie dane są wypełnione, 
+
+```Python
+full['_CabinType'] = pd.Categorical(full['Cabin'].astype(str).str[0]).codes
+```
+
+### Korelacja
+
+* Korelacja przydaje się do sprawdzenia zależności w kolumnach
+  * Korelacja wynosząca 1.0 oznacza pełną dodanie powiązanie (Jest na przekątnych), 
+  * Korelacja wynosząca -1.0 oznacza odwrotne powiązanie
+  * Im bliższe 0 tym korelacja jest mniejsza
+
+Z poniższego można wywnioskować że największy wpływ na przeżycie może mieć Pclass, \_Sex, Fare, oraz \_ CabinType. Musieliśmy wcześniej skategoryzować kolumnu ponieważ korelacji nie można sprawdzić na tekście.
+
+```Python
+cols = ['Age','_Embarked','Fare','Parch','Pclass','_Sex','SibSp','Survived','_CabinType']
+full[cols].corr()
+```
+
+![1531313541410](assets/1531313541410.png)
+
+###  Tytuł - Pattern
+
+* Warto sobie wyciągnąć tytuł z imienia i nazwiska czyli kolumny Name. Do tego przydaje się regular expression
+
+```Python
+pat = r",\s([^ .]+)\.?\s+"
+
+full['Title'] =  full['Name'].str.extract(pat,expand=True)[0]
+full.groupby('Title')['Title'].count()
+```
+
+```Python
+Title
+Capt          1
+Col           4
+Don           1
+Dona          1
+Dr            8
+Jonkheer      1
+Lady          1
+Major         2
+Master       61
+Miss        260
+Mlle          2
+Mme           1
+Mr          757
+Mrs         197
+Ms            2
+Rev           8
+Sir           1
+the           1
+Name: Title, dtype: int64
+```
+
+Najwięcej jest Miss, Master, Mr, oraz Mrs. Więc dla lepszego obrazu można zgrupować część danych.
+
+```Python
+full.loc[full['Title'].isin(['Mille','Ms','Lady']),'Title'] = 'Miss'
+full.loc[full['Title'].isin(['Mme','Sir']),'Title'] = 'Mrs'
+full.loc[~full['Title'].isin(['Miss','Master','Mr','Mrs']),'Title'] = 'Other' # NOT IN
+full['_Title'] = pd.Categorical(full.Title).codes
+full.groupby('Title')['Title'].count()
+```
+
+```Python
+Title
+Master     61
+Miss      263
+Mr        757
+Mrs       199
+Other      29
+Name: Title, dtype: int64
+```
+
+- Od razu zmniejszyła się ilość kategorii
+
+
+
+## Wykresy: Python
+
+W pythonie do podstawowych wykresów głównie się używa matplotlib, seaborn oraz ggplot (bazujące na ggplot2 z R-a).
+
+### Histogram
+
+* Podstawowym wykresem jest histogram czyli rozłożenie wartości według częstości występowania.
+
+```python
+full['Age'].hist(); 
+```
+
+![1531308774581](assets/1531308774581.png)
+
+Od razu widać żę najwięcej jest osób w przedziale od 20 do 30 roku życia.
+
+* Ale możemy chcieć też większy podział albo przefiltrowane na tylko te które przeżyły
+
+```python
+full[full['Survived']==1]['Age'].hist(bins=30)
+```
+
+![1531308927382](assets/1531308927382.png)
+
+* Można też nałożyć na siebie histogramy (za pomocą plt z matplotlib). Tworzymy dwa histogramy (plt_all i plt_survived), dodajemy legendę i wyświetlamy.
+
+```Python
+import matplotlib
+import matplotlib.pyplot as plt
+
+plt_all = plt.hist(full['Age'],bins = 30,  range = [0,100],label='all')
+plt_survived =plt.hist(full[full['Survived']==1]['Age'], bins = 30, range = [0,100],label='Survived')
+
+plt.legend()
+plt.show()
+```
+
+![1531310603373](assets/1531310603373.png)
+
+Zauważyć można żę młodsi mają większą szansę przeżycia (pomarańczowa pokrywa połowę wartości albo większość dla od 0 do 10)
+
+###  Boxplot
+
+Zawiera on dużo informacji więc lepiej doczytać co oznaczają poszczególne wartości
+
+https://www.wellbeingatschool.org.nz/information-sheet/understanding-and-interpreting-box-plots
+
+```Python
+full.boxplot(column='Age')
+```
+
+![1531311039013](assets/1531311039013.png)
+
+
+
+```Python
+full.boxplot(column='Age',by='Pclass')
+```
+
+![1531311958613](assets/1531311958613.png)
+
+### Correlation map
+
+* Dzięki correlation map możemy odczytać związki pomiędzy poszczególnymi kolumnami
+
+
+
+###  Dendrogram
+
+* Jednym z ciekawszych wykresów jest dendogram, który pokazuje zależności danych  w postaci drzewa
+
+Ten wykres można potraktować jako ciekawostkę, jedyne co można odczytać to to że Cabin i Age są najbardziej wpływowymi kolumnami.
+
+```python
+import missingno as msno
+msno.dendrogram(full)
+```
+
+![1531313292348](assets/1531313292348.png)
+
+### Heatmap
+
+* Heatmap pozwala zobaczyć zależności z korelacji. Ujemne korelacje są na ciemniejsz, a dodanie na coraz jaśniejsze.
+
+```Python
+cols = ['Age','_Embarked','Fare','Parch','Pclass','_Sex','SibSp','Survived','_CabinType']
+corr = full[cols].corr()
+
+import seaborn as sns
+sns.heatmap(corr)
+```
+
+![1531314238165](assets/1531314238165.png)
+
+
+
+### Wykresy zbiorowe
+
+* Wykresy można grupować przez sublots() - podajemy ilość kolumn i wierszy. Np, ja mogę łatwo zobaczyć stosunek ilości przeżytych do całości.
+
+```Python
+for column in ['Pclass','Sex','SibSp','Parch','Embarked']: 
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+
+    (train_df
+        .groupby(column)['Survived']
+        .agg(['count','sum'])
+        ).plot.bar(ax=axes[0])
+    (train_df
+        .groupby(column)['Survived']
+        .mean()
+        ).plot.bar(ax=axes[1])
+```
+
+
+
+![1531314471042](assets/1531314471042.png)
+
+![1531314556333](assets/1531314556333.png)
+
+![1531314565053](assets/1531314565053.png)
+
+* Wyciągnałem tak też nową kolumnę TicketCounts które oznacza ile osób ma ten sam numer biletu.
+
+```Python
+full['TicketCounts'] = full.groupby(['Ticket'])['Ticket'].transform('count')
+
+(full
+.groupby('TicketCounts')['Survived']
+.agg(['count','sum'])
+).plot.bar()
+plt.show()
+(full
+.groupby('TicketCounts')['Survived']
+.mean()
+).plot.bar()
+plt.show()
+```
+
+![1531314658243](assets/1531314658243.png)
+
+
+
+## Dane: R
+
+### Kategoryzacja
+
+* W przypadku R kategoryzacja polega na przerobieniu na factor za pomocą as.factor a następnie na as.numeric
+
+```R
+full$Sex2 <- as.numeric(as.factor(full$Sex))
+full['_Embarked'] = pd.Categorical(full.Embarked).codes
+
+```
+
+### Kategoryzacja kolumny Cabin
+
+```R
+full$Cabin2 <-as.numeric(as.factor(substring(full$Cabin, 0, 1) ))
+```
+
+### Korelacja
+
+* Korelacje można wwykonać przez funkcję 
+
+```R
+cols <- c('Age','Sex2','Embarked2','Fare','Parch','Pclass','SibSp','Survived','Cabin2')
+cor( full[,cols], use="complete.obs")
+```
+
+![1531319057276](assets/1531319057276.png)
+
+Widać największą korelację przy kolumnie Sex2, Age, Fare. To pomoże przy określaniu kolumn dostępnych do algorytmu.
+
+### Tytuł - Pattern
+
+* Warto sobie wyciągnąć tytuł z imienia i nazwiska czyli kolumny Name. Do tego przydaje się regular expression
+* Tytuł można wyłuskać przez str_match z biblioteki 
+
+```R
+library(stringr)
+full$Title <- str_match(full$Name, ",\\s([^ .]+)\\.?\\s+")[,2]
+```
+
+```R
+full %>% 
+  group_by(Title) %>% 
+  summarise(cnt = n()) %>%
+  arrange(desc(cnt))
+```
+
+```R
+ Title      cnt
+   <chr>    <int>
+ 1 Mr         757
+ 2 Miss       260
+ 3 Mrs        197
+ 4 Master      61
+ 5 Dr           8
+ 6 Rev          8
+ 7 Col          4
+ 8 Major        2
+ 9 Mlle         2
+10 Ms           2
+11 Capt         1
+12 Don          1
+13 Dona         1
+14 Jonkheer     1
+15 Lady         1
+16 Mme          1
+17 Sir          1
+18 the          1
+```
+
+* Część danych nie jest potrzebna, dlatego najlepiej zgrupować je sobie w kilka kategori do lepszego predykcji
+
+```R
+full$Title2 <- full$Title
+full$Title2[ full$Title %in% c('Mille','Ms','Lady')] <- 'Miss'
+full$Title2[ full$Title %in% c('Mme','Sir')] <- 'Mrs'
+full$Title2[ ! full$Title %in% c('Miss','Master','Mr','Mrs')] <- 'Other' 
+
+full %>% 
+  group_by(Title2) %>% 
+  summarise(cnt = n()) %>%
+  arrange(desc(cnt))
+```
+
+```R
+ Title2   cnt
+  <chr>  <int>
+1 Mr       757
+2 Miss     260
+3 Mrs      197
+4 Master    61
+5 Other     34
+```
+
+## Wykresy: R
+
+###  Histogram
+
+```R
+hist(full$Age)
+```
+
+![1531320637716](assets/1531320637716.png)
+
+```R
+ggplot(data=full, aes(full$Age)) + geom_histogram()
+```
+
+![1531320658550](assets/1531320658550.png)
+
+```R
+ggplot(data=full, aes(full$Age)) + geom_histogram(bins=10)
+```
+
+![1531320805570](assets/1531320805570.png)
+
+
+
